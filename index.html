@@ -5,16 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>When the Mailbox Went Empty</title>
 
-    <!-- Favicon (Red Mailbox) -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📮</text></svg>">
 
-    <!-- Facebook / Open Graph Meta Tags -->
     <meta property="og:title" content="When the Mailbox Went Empty">
     <meta property="og:description" content="An interactive poetic timeline by Trent Sellars reflecting on physical mail, memory, and nostalgia.">
     <meta property="og:type" content="website">
     <meta property="og:image" content="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='630' viewBox='0 0 1200 630' style='background:%23f4efeb;'><rect width='100%' height='100%' fill='%23f4efeb'/><text x='50%' y='40%' font-size='180' text-anchor='middle'>📮</text><text x='50%' y='65%' font-family='Georgia, serif' font-size='56' fill='%23d3423e' font-weight='bold' text-anchor='middle'>When the Mailbox Went Empty</text><text x='50%' y='75%' font-family='Courier, monospace' font-size='28' fill='%232c4a6b' text-anchor='middle'>BY TRENT SELLARS</text></svg>">
     
-    <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="When the Mailbox Went Empty">
     <meta name="twitter:description" content="An interactive poetic timeline by Trent Sellars.">
@@ -43,7 +40,6 @@
             padding-bottom: 120px;
         }
 
-        /* Fixed Score HUD */
         .score-hud {
             position: fixed;
             bottom: 25px;
@@ -68,7 +64,6 @@
             background: var(--postal-blue);
         }
 
-        /* Header */
         header {
             text-align: center;
             padding: 12vh 5vw 6vh;
@@ -93,7 +88,6 @@
             font-weight: bold;
         }
 
-        /* Timeline Layout */
         .timeline {
             position: relative;
             max-width: 920px;
@@ -420,7 +414,7 @@
             letter-spacing: 1px;
         }
 
-        /* --- STANZA 7: Pat's Retirement Log --- */
+        /* --- STANZA 7: Pat's Retirement Log & Leaderboard --- */
         .pat-log-card {
             background: #fff;
             border: 2px dashed var(--postal-red);
@@ -438,17 +432,15 @@
             margin-bottom: 12px;
             border-radius: 3px;
         }
-        .pat-stamp {
-            display: none;
-            margin: 15px auto 0;
-            padding: 8px 16px;
-            border: 3px double var(--postal-red);
-            color: var(--postal-red);
+        .name-input {
+            width: 100%;
+            padding: 10px;
             font-family: 'Courier Prime', monospace;
-            font-weight: bold;
-            font-size: 1.3rem;
-            transform: rotate(-5deg);
-            width: max-content;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            border: 1px solid var(--khaki);
+            border-radius: 4px;
+            text-align: center;
         }
         .save-mail-btn {
             width: 100%;
@@ -463,18 +455,27 @@
             box-shadow: 0 4px 0 #8b2320;
             letter-spacing: 1px;
         }
+        .leaderboard-table {
+            width: 100%;
+            margin-top: 15px;
+            border-collapse: collapse;
+            font-family: 'Courier Prime', monospace;
+            font-size: 0.85rem;
+        }
+        .leaderboard-table th, .leaderboard-table td {
+            padding: 6px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+        .leaderboard-table th {
+            color: var(--postal-blue);
+            border-bottom: 2px solid var(--postal-blue);
+        }
 
-        /* Mobile Styling Fixes */
         @media screen and (max-width: 768px) {
-            header h1 {
-                font-size: 2.5rem;
-            }
-            .timeline {
-                padding: 10px 0;
-            }
-            .timeline::after {
-                display: none;
-            }
+            header h1 { font-size: 2.5rem; }
+            .timeline { padding: 10px 0; }
+            .timeline::after { display: none; }
             .stanza-container {
                 width: 100%;
                 padding: 0 5px;
@@ -486,10 +487,7 @@
                 border-left: 4px solid var(--postal-red) !important;
                 border-right: 1px solid var(--khaki) !important;
             }
-            .poem-text {
-                font-size: 1.05rem;
-                line-height: 1.75;
-            }
+            .poem-text { font-size: 1.05rem; line-height: 1.75; }
             .score-hud {
                 bottom: 15px;
                 right: 15px;
@@ -501,7 +499,6 @@
 </head>
 <body>
 
-    <!-- Persistent HUD Score Counter -->
     <div class="score-hud" id="hud">TOTAL SENT: <span id="score-val">0</span></div>
 
     <header>
@@ -634,10 +631,21 @@
                     A polished khaki mailbox, like a letter, was sent away.
                 </div>
                 <div class="pat-log-card">
-                    <div class="pat-badge">OFFICIAL POSTAL LOG // OLD PAT</div>
-                    <button class="save-mail-btn" id="save-mail-btn" onclick="saveMailboxAndLog()">SAVE MAILBOX</button>
-                    <div class="pat-stamp" id="pat-stamp">PRESERVED IN HISTORY</div>
-                    <p id="pat-summary" style="font-family:'Courier Prime'; margin-top:12px; display:none; font-size:0.95rem; line-height:1.5; color:var(--postal-blue);"></p>
+                    <div class="pat-badge">GLOBAL POSTAL ARCHIVE</div>
+                    <input type="text" id="player-name" class="name-input" placeholder="Enter your name..." maxlength="15">
+                    <button class="save-mail-btn" id="save-mail-btn" onclick="saveMailboxAndLog()">SAVE MAILBOX & SUBMIT</button>
+                    
+                    <div id="leaderboard-box" style="margin-top:20px;">
+                        <h4 style="font-family:'Courier Prime'; color:var(--postal-blue);">TOP POSTMASTERS</h4>
+                        <table class="leaderboard-table" id="leaderboard-table">
+                            <thead>
+                                <tr><th>Rank</th><th>Name</th><th>Mail Saved</th></tr>
+                            </thead>
+                            <tbody id="leaderboard-body">
+                                <tr><td colspan="3">Loading rankings...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -645,6 +653,9 @@
     </div>
 
     <script>
+        // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE:
+        const LEADERBOARD_API = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
+
         let totalSent = 0;
         const scoreVal = document.getElementById('score-val');
         const hud = document.getElementById('hud');
@@ -656,11 +667,10 @@
             setTimeout(() => hud.classList.remove('bump'), 150);
         }
 
-        /* --- STANZA 1: Memory Match Logic --- */
+        /* --- STANZA 1 --- */
         const memGrid = document.getElementById('mem-grid');
         const memIcons = ['🎁','🎁','🎁','💌','💌','💌','📄','📄','📄'];
         memIcons.sort(() => Math.random() - 0.5);
-        
         let flippedCards = [];
         memIcons.forEach((icon, index) => {
             const card = document.createElement('div');
@@ -673,16 +683,13 @@
 
         function flipMemCard(card) {
             if (card.classList.contains('flipped') || card.classList.contains('matched') || flippedCards.length >= 3) return;
-            
             card.classList.add('flipped');
             card.innerText = card.dataset.icon;
             flippedCards.push(card);
 
             if (flippedCards.length === 3) {
                 const first = flippedCards[0].dataset.icon;
-                const isMatch = flippedCards.every(c => c.dataset.icon === first);
-
-                if (isMatch) {
+                if (flippedCards.every(c => c.dataset.icon === first)) {
                     flippedCards.forEach(c => c.classList.add('matched'));
                     flippedCards = [];
                     addScore(1);
@@ -698,7 +705,7 @@
             }
         }
 
-        /* --- STANZA 2: Quiz Logic --- */
+        /* --- STANZA 2 --- */
         const quizBank = [
             { prompt: "What item does Pat deliver on Sunday?", correct: "Local Paper", options: ["Local Paper", "Woman's Day Magazine", "Pamphlet for Groceries", "Festive Loot"] },
             { prompt: "What item does Pat deliver on Wednesday?", correct: "Woman's Day Magazine", options: ["Woman's Day Magazine", "Local Paper", "Pamphlet for Groceries", "Insurance Bill"] },
@@ -708,11 +715,10 @@
 
         const chosenQuiz = quizBank[Math.floor(Math.random() * quizBank.length)];
         document.getElementById('quiz-prompt').innerText = chosenQuiz.prompt;
-
         const shuffledOptions = [...chosenQuiz.options].sort(() => Math.random() - 0.5);
         const quizOptionsContainer = document.getElementById('quiz-options');
-
         let quizAnswered = false;
+
         shuffledOptions.forEach(opt => {
             const btn = document.createElement('button');
             btn.className = 'quiz-btn';
@@ -731,7 +737,7 @@
             quizOptionsContainer.appendChild(btn);
         });
 
-        /* --- STANZA 3: Timed Guard the Mailbox Blitz --- */
+        /* --- STANZA 3 --- */
         const shooStage = document.getElementById('shoo-stage');
         let shooCount = 0;
         let shooTimeLeft = 10;
@@ -790,15 +796,13 @@
 
             shooStage.appendChild(visitor);
         }
-
         spawnVisitor();
         spawnVisitor();
 
-        /* --- STANZA 4: Moving Rain Grid Maze (FIXED) --- */
+        /* --- STANZA 4 --- */
         const gridBoard = document.getElementById('grid-board');
         let playerPos = { x: 0, y: 0 };
         const goalPos = { x: 4, y: 4 };
-        // Raindrops placed in columns 1, 2, and 3 (never entering start column 0 or goal column 4)
         let rainDrops = [
             { x: 1, y: 0, dir: 1 },
             { x: 2, y: 4, dir: -1 },
@@ -820,16 +824,12 @@
             for (let r = 0; r < 5; r++) {
                 for (let c = 0; c < 5; c++) {
                     const cell = document.getElementById(`cell-${c}-${r}`);
-                    if (cell) {
-                        cell.innerText = (c === goalPos.x && r === goalPos.y) ? '📬' : '';
-                    }
+                    if (cell) cell.innerText = (c === goalPos.x && r === goalPos.y) ? '📬' : '';
                 }
             }
             rainDrops.forEach(drop => {
                 const cell = document.getElementById(`cell-${drop.x}-${drop.y}`);
-                if (cell && (drop.x !== goalPos.x || drop.y !== goalPos.y)) {
-                    cell.innerText = '💧';
-                }
+                if (cell && (drop.x !== goalPos.x || drop.y !== goalPos.y)) cell.innerText = '💧';
             });
             const pCell = document.getElementById(`cell-${playerPos.x}-${playerPos.y}`);
             if (pCell) pCell.innerText = '✉️';
@@ -837,9 +837,10 @@
 
         function movePlayer(dx, dy) {
             if (!mazeActive) return;
-            const newX = Math.max(0, Math.min(4, playerPos.x + dx));
-            const newY = Math.max(0, Math.min(4, playerPos.y + dy));
-            playerPos = { x: newX, y: newY };
+            playerPos = {
+                x: Math.max(0, Math.min(4, playerPos.x + dx)),
+                y: Math.max(0, Math.min(4, playerPos.y + dy))
+            };
             checkMazeState();
             renderMaze();
         }
@@ -848,24 +849,17 @@
             if (!mazeActive) return;
             rainDrops.forEach(drop => {
                 drop.y += drop.dir;
-                if (drop.y >= 4) {
-                    drop.y = 4;
-                    drop.dir = -1;
-                } else if (drop.y <= 0) {
-                    drop.y = 0;
-                    drop.dir = 1;
-                }
+                if (drop.y >= 4) { drop.y = 4; drop.dir = -1; }
+                else if (drop.y <= 0) { drop.y = 0; drop.dir = 1; }
             });
             checkMazeState();
             renderMaze();
         }
 
         function checkMazeState() {
-            const hitRain = rainDrops.some(drop => drop.x === playerPos.x && drop.y === playerPos.y);
-            if (hitRain) {
+            if (rainDrops.some(drop => drop.x === playerPos.x && drop.y === playerPos.y)) {
                 playerPos = { x: 0, y: 0 };
             }
-            
             if (playerPos.x === goalPos.x && playerPos.y === goalPos.y) {
                 mazeActive = false;
                 document.getElementById('s4-status').innerText = '✓ Safe through the storm! (+2)';
@@ -884,7 +878,7 @@
             if (['ArrowRight', 'KeyD'].includes(e.code)) { movePlayer(1, 0); e.preventDefault(); }
         });
 
-        /* --- STANZA 5: Hangman Logic --- */
+        /* --- STANZA 5 --- */
         const wordPool = ["EMAIL", "COMPUTER", "TELEVISION", "TELEPHONE", "ZOOM"];
         const secretWord = wordPool[Math.floor(Math.random() * wordPool.length)];
         let guessedLetters = [];
@@ -941,7 +935,7 @@
             document.querySelector('.hangman-area').appendChild(sub);
         }
 
-        /* --- STANZA 6: Gauge Meter Logic --- */
+        /* --- STANZA 6 --- */
         const needle = document.getElementById('gauge-needle');
         let needlePos = 0;
         let needleDir = 2.2;
@@ -960,7 +954,6 @@
             if (!gaugeActive) return;
             gaugeActive = false;
             const btn = document.getElementById('gauge-btn');
-            
             if (needlePos >= 40 && needlePos <= 60) {
                 addScore(3);
                 btn.innerText = '🎯 DIRECTED TO MAILBOX (+3)';
@@ -972,15 +965,51 @@
             }
         }
 
-        /* --- STANZA 7: Pat's Retirement Log Logic --- */
-        function saveMailboxAndLog() {
-            document.getElementById('save-mail-btn').style.display = 'none';
-            document.getElementById('pat-stamp').style.display = 'block';
-            
-            const summary = document.getElementById('pat-summary');
-            summary.style.display = 'block';
-            summary.innerHTML = `<strong>Postmaster Pat's Record:</strong><br>You helped save <strong>${totalSent}</strong> pieces of physical mail, holding post alongside the khaki mailbox before demo day came.`;
+        /* --- STANZA 7 & LEADERBOARD LOGIC --- */
+        async function fetchLeaderboard() {
+            if (!LEADERBOARD_API || LEADERBOARD_API.includes("YOUR_GOOGLE_APPS_SCRIPT_URL_HERE")) {
+                document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="3">Set API URL to enable.</td></tr>';
+                return;
+            }
+            try {
+                const res = await fetch(LEADERBOARD_API);
+                const data = await res.json();
+                const body = document.getElementById('leaderboard-body');
+                body.innerHTML = '';
+                
+                data.forEach((row, i) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>#${i + 1}</td><td>${row[0]}</td><td>${row[1]}</td>`;
+                    body.appendChild(tr);
+                });
+            } catch(e) {
+                document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="3">Could not load leaderboard.</td></tr>';
+            }
         }
+
+        async function saveMailboxAndLog() {
+            const nameInput = document.getElementById('player-name').value.trim() || 'Anonymous';
+            const saveBtn = document.getElementById('save-mail-btn');
+            saveBtn.disabled = true;
+            saveBtn.innerText = 'SAVING...';
+
+            if (LEADERBOARD_API && !LEADERBOARD_API.includes("YOUR_GOOGLE_APPS_SCRIPT_URL_HERE")) {
+                try {
+                    await fetch(LEADERBOARD_API, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name: nameInput, score: totalSent })
+                    });
+                } catch(e) {}
+            }
+
+            saveBtn.style.display = 'none';
+            document.getElementById('player-name').style.display = 'none';
+            fetchLeaderboard();
+        }
+
+        fetchLeaderboard();
 
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
