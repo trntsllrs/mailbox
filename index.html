@@ -654,7 +654,7 @@
 
     <script>
         // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE:
-        const LEADERBOARD_API = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
+        const LEADERBOARD_API = "https://script.google.com/macros/s/AKfycbw06LX-zh0QpC20EF10ZwSuQju5WRXTsbBYPUqC0TmURqdoeiuIPxxyG-aiajZQ3RV4gg/exec";
 
         let totalSent = 0;
         const scoreVal = document.getElementById('score-val');
@@ -967,7 +967,7 @@
 
         /* --- STANZA 7 & LEADERBOARD LOGIC --- */
         async function fetchLeaderboard() {
-            if (!LEADERBOARD_API || LEADERBOARD_API.includes("YOUR_GOOGLE_APPS_SCRIPT_URL_HERE")) {
+            if (!LEADERBOARD_API || LEADERBOARD_API.includes("https://script.google.com/macros/s/AKfycbw06LX-zh0QpC20EF10ZwSuQju5WRXTsbBYPUqC0TmURqdoeiuIPxxyG-aiajZQ3RV4gg/exec")) {
                 document.getElementById('leaderboard-body').innerHTML = '<tr><td colspan="3">Set API URL to enable.</td></tr>';
                 return;
             }
@@ -993,7 +993,7 @@
             saveBtn.disabled = true;
             saveBtn.innerText = 'SAVING...';
 
-            if (LEADERBOARD_API && !LEADERBOARD_API.includes("YOUR_GOOGLE_APPS_SCRIPT_URL_HERE")) {
+            if (LEADERBOARD_API && !LEADERBOARD_API.includes("https://script.google.com/macros/s/AKfycbw06LX-zh0QpC20EF10ZwSuQju5WRXTsbBYPUqC0TmURqdoeiuIPxxyG-aiajZQ3RV4gg/exec")) {
                 try {
                     await fetch(LEADERBOARD_API, {
                         method: 'POST',
