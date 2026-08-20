@@ -3,7 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>When the Mailbox Went Empty!</title>
+    <title>When the Mailbox Went Empty</title>
+
+    <!-- Favicon (Red Mailbox) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📮</text></svg>">
+
+    <!-- Facebook / Open Graph Meta Tags -->
+    <meta property="og:title" content="When the Mailbox Went Empty">
+    <meta property="og:description" content="An interactive poetic timeline by Trent Sellars reflecting on physical mail, memory, and nostalgia.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='630' viewBox='0 0 1200 630' style='background:%23f4efeb;'><rect width='100%' height='100%' fill='%23f4efeb'/><text x='50%' y='40%' font-size='180' text-anchor='middle'>📮</text><text x='50%' y='65%' font-family='Georgia, serif' font-size='56' fill='%23d3423e' font-weight='bold' text-anchor='middle'>When the Mailbox Went Empty</text><text x='50%' y='75%' font-family='Courier, monospace' font-size='28' fill='%232c4a6b' text-anchor='middle'>BY TRENT SELLARS</text></svg>">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="When the Mailbox Went Empty">
+    <meta name="twitter:description" content="An interactive poetic timeline by Trent Sellars.">
+
     <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -56,9 +71,9 @@
         /* Header */
         header {
             text-align: center;
-            padding: 14vh 5vw 8vh;
+            padding: 12vh 5vw 6vh;
             border-bottom: 2px dashed var(--khaki);
-            margin-bottom: 50px;
+            margin-bottom: 40px;
         }
 
         header h1 {
@@ -145,7 +160,7 @@
             margin-top: 12px;
         }
 
-        /* --- STANZA 1: 3x3 Memory Game --- */
+        /* --- STANZA 1: Memory Game --- */
         .memory-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -209,10 +224,11 @@
             border-color: var(--postal-red);
         }
 
-        /* --- STANZA 3: Timed Guard the Mailbox --- */
+        /* --- STANZA 3: Timed Guard Game --- */
         .shoo-stage {
             position: relative;
-            width: 280px;
+            width: 100%;
+            max-width: 280px;
             height: 150px;
             margin: 0 auto;
             background: #f7f2ec;
@@ -355,7 +371,7 @@
             cursor: default;
         }
 
-        /* --- STANZA 6: Light Theme Timing Gauge --- */
+        /* --- STANZA 6: Timing Gauge --- */
         .gauge-card {
             background: #f7f2ec;
             padding: 20px;
@@ -448,9 +464,39 @@
             letter-spacing: 1px;
         }
 
+        /* --- MOBILE STYLING FIXES --- */
         @media screen and (max-width: 768px) {
-            .timeline::after { left: 20px; }
-            .stanza-container { width: 100%; padding-left: 45px; padding-right: 0; left: 0 !important; }
+            header h1 {
+                font-size: 2.5rem;
+            }
+            .timeline {
+                padding: 10px 0;
+            }
+            /* Hide vertical line on mobile */
+            .timeline::after {
+                display: none;
+            }
+            .stanza-container {
+                width: 100%;
+                padding: 0 5px;
+                left: 0 !important;
+                margin-bottom: 25px;
+            }
+            .stanza-box {
+                padding: 20px 16px;
+                border-left: 4px solid var(--postal-red) !important;
+                border-right: 1px solid var(--khaki) !important;
+            }
+            .poem-text {
+                font-size: 1.05rem;
+                line-height: 1.75;
+            }
+            .score-hud {
+                bottom: 15px;
+                right: 15px;
+                padding: 10px 16px;
+                font-size: 0.95rem;
+            }
         }
     </style>
 </head>
@@ -466,7 +512,7 @@
 
     <div class="timeline">
         
-        <!-- Stanza 1: 3x3 Memory Game -->
+        <!-- Stanza 1 -->
         <div class="stanza-container">
             <div class="stanza-box">
                 <div class="poem-text">
@@ -480,7 +526,7 @@
             </div>
         </div>
 
-        <!-- Stanza 2: Quiz Game -->
+        <!-- Stanza 2 -->
         <div class="stanza-container">
             <div class="stanza-box">
                 <div class="poem-text">
@@ -494,7 +540,7 @@
             </div>
         </div>
 
-        <!-- Stanza 3: Timed Guard the Mailbox Game -->
+        <!-- Stanza 3 -->
         <div class="stanza-container">
             <div class="stanza-box">
                 <div class="poem-text">
@@ -510,7 +556,7 @@
             </div>
         </div>
 
-        <!-- Stanza 4: Moving Rain Grid Maze -->
+        <!-- Stanza 4 -->
         <div class="stanza-container">
             <div class="stanza-box">
                 <div class="poem-text">
@@ -534,7 +580,7 @@
             </div>
         </div>
 
-        <!-- Stanza 5: Envelope Hangman -->
+        <!-- Stanza 5 -->
         <div class="stanza-container">
             <div class="stanza-box">
                 <div class="poem-text">
@@ -558,7 +604,7 @@
             </div>
         </div>
 
-        <!-- Stanza 6: Polished Timing Gauge -->
+        <!-- Stanza 6 -->
         <div class="stanza-container">
             <div class="stanza-box">
                 <div class="poem-text">
@@ -579,7 +625,7 @@
             </div>
         </div>
 
-        <!-- Stanza 7: Pat's Retirement Log -->
+        <!-- Stanza 7 -->
         <div class="stanza-container">
             <div class="stanza-box">
                 <div class="poem-text">
@@ -702,7 +748,7 @@
                     clearInterval(shooTimer);
                     shooActive = false;
                     document.querySelectorAll('.shoo-visitor').forEach(v => v.remove());
-                    addScore(shooCount); // 1 point per shooed visitor
+                    addScore(shooCount);
                     document.getElementById('s3-status').innerText = `✓ Blitz over! You shooed ${shooCount} visitors! (+${shooCount})`;
                     document.getElementById('s3-status').style.color = 'var(--success-green)';
                 }
@@ -723,10 +769,11 @@
             visitor.className = 'shoo-visitor';
             visitor.innerText = Math.random() > 0.5 ? '🐕' : '🕊️';
             
+            const stageWidth = shooStage.clientWidth || 280;
             const angles = [15, 45, 80, 120, 160, 200, 240, 290, 330];
             const angle = angles[Math.floor(Math.random() * angles.length)];
             const rad = angle * (Math.PI / 180);
-            const x = 140 + Math.cos(rad) * 95 - 15;
+            const x = (stageWidth / 2) + Math.cos(rad) * (stageWidth * 0.35) - 15;
             const y = 75 + Math.sin(rad) * 55 - 15;
             
             visitor.style.left = `${x}px`;
@@ -734,7 +781,7 @@
 
             visitor.onclick = () => {
                 if (!shooActive) return;
-                startShooGame(); // Begins 10s countdown on first click
+                startShooGame();
                 visitor.remove();
                 shooCount++;
                 updateShooStatus();
@@ -803,18 +850,6 @@
             });
             checkMazeState();
             renderMaze();
-        }
-
-        function checkMazeState() {
-            const hitRain = rainDrops.some(drop => drop.x === playerPos.x && drop.y === playerPos.y);
-            if (hitRain) playerPos = { x: 0, y: 0 };
-            
-            if (playerPos.x === goalPos.x && playerPos.y === goalPos.y) {
-                mazeActive = false;
-                document.getElementById('s4-status').innerText = '✓ Safe through the storm! (+2)';
-                document.getElementById('s4-status').style.color = 'var(--success-green)';
-                addScore(2);
-            }
         }
 
         setInterval(updateRain, 650);
