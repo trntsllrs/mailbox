@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>When the Mailbox Went Empty</title>
+    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-paper: #f4efeb;
+            --text-ink: #2b2b2b;
+            --khaki: #bca38f;
+            --postal-red: #d3423e;
+            --postal-blue: #2c4a6b;
+            --accent-gold: #c5a059;
+            --success-green: #2e7d32;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-paper);
+            color: var(--text-ink);
+            font-family: 'Playfair Display', serif;
+            overflow-x: hidden;
+            background-image: radial-gradient(#d5caba 1px, transparent 1px);
+            background-size: 20px 20px;
+            padding-bottom: 120px;
+        }
+
+        /* Fixed Score HUD */
+        .score-hud {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: var(--postal-red);
+            color: #ffffff;
+            font-family: 'Courier Prime', monospace;
+            padding: 14px 22px;
+            border: 3px solid #ffffff;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+            z-index: 9999;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 6px;
+            letter-spacing: 1px;
+            transition: transform 0.15s ease, background-color 0.3s;
+            user-select: none;
+        }
+
+        .score-hud.bump {
+            transform: scale(1.18);
+            background: var(--postal-blue);
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 14vh 5vw 8vh;
+            border-bottom: 2px dashed var(--khaki);
+            margin-bottom: 50px;
+        }
+
+        header h1 {
+            font-family: 'Abril Fatface', display;
+            font-size: 3.6rem;
+            color: var(--postal-red);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            line-height: 1.1;
+        }
+
+        header p {
+            font-family: 'Courier Prime', monospace;
+            font-size: 1.1rem;
+            color: var(--postal-blue);
+            font-weight: bold;
+        }
+
+        /* Timeline Layout */
+        .timeline {
+            position: relative;
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            background-color: var(--postal-blue);
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -2px;
+            border-radius: 2px;
+        }
+
+        .stanza-container {
+            padding: 10px 30px;
+            position: relative;
+            width: 50%;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s ease-out;
+            margin-bottom: 40px;
+        }
+
+        .stanza-container.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .stanza-container:nth-child(odd) { left: 0; }
+        .stanza-container:nth-child(even) { left: 50%; }
+
+        .stanza-box {
+            padding: 28px;
+            background: #fffafa;
+            border: 1px solid var(--khaki);
+            border-left: 5px solid var(--postal-red);
+            box-shadow: 4px 6px 18px rgba(0,0,0,0.06);
+            position: relative;
+            border-radius: 4px;
+        }
+
+        .stanza-container:nth-child(even) .stanza-box {
+            border-left: 1px solid var(--khaki);
+            border-right: 5px solid var(--postal-blue);
+        }
+
+        .poem-text {
+            font-size: 1.12rem;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .typewriter-sub {
+            font-family: 'Courier Prime', monospace;
+            font-size: 0.82rem;
+            text-align: center;
+            color: #666;
+            margin-top: 12px;
+        }
+
+        /* --- STANZA 1: 3x3 Memory Game --- */
+        .memory-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            max-width: 260px;
+            margin: 0 auto;
+        }
+        .mem-card {
+            aspect-ratio: 1;
+            background: #e8ded2;
+            border: 2px solid var(--khaki);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.2s, background 0.2s;
+            font-family: 'Courier Prime', monospace;
+        }
+        .mem-card.flipped {
+            background: #ffffff;
+            border-color: var(--postal-blue);
+        }
+        .mem-card.matched {
+            background: #d4edda;
+            border-color: var(--success-green);
+            cursor: default;
+        }
+
+        /* --- STANZA 2: Quiz Game --- */
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .quiz-btn {
+            padding: 10px 14px;
+            background: #ffffff;
+            border: 1.5px solid var(--khaki);
+            font-family: 'Courier Prime', monospace;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-align: left;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .quiz-btn:hover:not(:disabled) {
+            border-color: var(--postal-blue);
+            background: #f0f4f8;
+        }
+        .quiz-btn.correct {
+            background: var(--success-green) !important;
+            color: #fff;
+            border-color: var(--success-green);
+        }
+        .quiz-btn.wrong {
+            background: var(--postal-red) !important;
+            color: #fff;
+            border-color: var(--postal-red);
+        }
+
+        /* --- STANZA 3: Timed Guard the Mailbox --- */
+        .shoo-stage {
+            position: relative;
+            width: 280px;
+            height: 150px;
+            margin: 0 auto;
+            background: #f7f2ec;
+            border: 2px solid var(--khaki);
+            border-radius: 6px;
+            overflow: hidden;
+            user-select: none;
+        }
+        .mailbox-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.8rem;
+            z-index: 2;
+        }
+        .shoo-visitor {
+            position: absolute;
+            font-size: 2rem;
+            cursor: pointer;
+            z-index: 3;
+            transition: transform 0.1s ease;
+            animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+
+        /* --- STANZA 4: Moving Rain Grid Maze --- */
+        .maze-container {
+            background: #f7f2ec;
+            border: 2px solid var(--khaki);
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            color: var(--text-ink);
+        }
+        .grid-board {
+            display: grid;
+            grid-template-columns: repeat(5, 40px);
+            grid-template-rows: repeat(5, 40px);
+            gap: 4px;
+            width: 224px;
+            height: 224px;
+            margin: 10px auto;
+            background: #e8ded2;
+            padding: 6px;
+            border-radius: 6px;
+            border: 1px solid var(--khaki);
+            justify-content: center;
+            align-content: center;
+        }
+        .grid-cell {
+            width: 40px;
+            height: 40px;
+            background: #fffafa;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            user-select: none;
+            box-sizing: border-box;
+            overflow: hidden;
+            border: 1px solid #dfd5c8;
+        }
+        .grid-cell.goal {
+            background: #e2f0d9;
+            border: 1px dashed var(--success-green);
+        }
+        .dpad {
+            display: grid;
+            grid-template-columns: repeat(3, 40px);
+            grid-template-rows: repeat(2, 36px);
+            gap: 4px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .dpad-btn {
+            background: var(--khaki);
+            color: #fff;
+            border: none;
+            font-family: 'Courier Prime', monospace;
+            font-weight: bold;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .dpad-btn:active { background: var(--postal-blue); }
+
+        /* --- STANZA 5: Envelope Hangman --- */
+        .hangman-area {
+            text-align: center;
+        }
+        .envelope-svg {
+            width: 130px;
+            height: 80px;
+            margin: 0 auto 10px;
+            background: #fdfbf7;
+            border: 1px solid #ccc;
+        }
+        .envelope-line {
+            stroke: var(--postal-red);
+            stroke-width: 3;
+            stroke-linecap: round;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .envelope-line.drawn { opacity: 1; }
+        .word-slots {
+            font-family: 'Courier Prime', monospace;
+            font-size: 1.5rem;
+            letter-spacing: 6px;
+            margin-bottom: 12px;
+            font-weight: bold;
+        }
+        .letter-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+        }
+        .key-btn {
+            width: 32px;
+            height: 32px;
+            background: #fff;
+            border: 1px solid var(--text-ink);
+            font-family: 'Courier Prime', monospace;
+            cursor: pointer;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        .key-btn:disabled {
+            background: #ddd;
+            border-color: #bbb;
+            cursor: default;
+        }
+
+        /* --- STANZA 6: Light Theme Timing Gauge --- */
+        .gauge-card {
+            background: #f7f2ec;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid var(--khaki);
+            color: var(--text-ink);
+            text-align: center;
+        }
+        .meter-housing {
+            width: 100%;
+            height: 28px;
+            background: #e8ded2;
+            border-radius: 14px;
+            position: relative;
+            margin: 15px 0;
+            overflow: hidden;
+            border: 2px solid var(--khaki);
+        }
+        .sweet-spot {
+            position: absolute;
+            left: 40%;
+            width: 20%;
+            height: 100%;
+            background: rgba(46, 125, 50, 0.4);
+            border-left: 2px solid var(--success-green);
+            border-right: 2px solid var(--success-green);
+        }
+        .meter-needle {
+            position: absolute;
+            width: 6px;
+            height: 100%;
+            background: var(--postal-red);
+            box-shadow: 0 0 4px var(--postal-red);
+            left: 0;
+        }
+        .intercept-btn {
+            padding: 10px 24px;
+            background: var(--postal-red);
+            color: #fff;
+            border: none;
+            font-family: 'Abril Fatface', serif;
+            font-size: 1.05rem;
+            cursor: pointer;
+            border-radius: 4px;
+            box-shadow: 0 4px 0 #8b2320;
+            letter-spacing: 1px;
+        }
+
+        /* --- STANZA 7: Pat's Retirement Log --- */
+        .pat-log-card {
+            background: #fff;
+            border: 2px dashed var(--postal-red);
+            padding: 20px;
+            text-align: center;
+            border-radius: 6px;
+        }
+        .pat-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            background: var(--postal-blue);
+            color: #fff;
+            font-family: 'Courier Prime', monospace;
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+            border-radius: 3px;
+        }
+        .pat-stamp {
+            display: none;
+            margin: 15px auto 0;
+            padding: 8px 16px;
+            border: 3px double var(--postal-red);
+            color: var(--postal-red);
+            font-family: 'Courier Prime', monospace;
+            font-weight: bold;
+            font-size: 1.3rem;
+            transform: rotate(-5deg);
+            width: max-content;
+        }
+        .save-mail-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--postal-red);
+            color: white;
+            border: none;
+            font-family: 'Abril Fatface', serif;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border-radius: 4px;
+            box-shadow: 0 4px 0 #8b2320;
+            letter-spacing: 1px;
+        }
+
+        @media screen and (max-width: 768px) {
+            .timeline::after { left: 20px; }
+            .stanza-container { width: 100%; padding-left: 45px; padding-right: 0; left: 0 !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Persistent HUD Score Counter -->
+    <div class="score-hud" id="hud">TOTAL SENT: <span id="score-val">0</span></div>
+
+    <header>
+        <h1>When the Mailbox<br>Went Empty</h1>
+        <p>PRIORITY MAIL // BY TRENT SELLARS</p>
+    </header>
+
+    <div class="timeline">
+        
+        <!-- Stanza 1: 3x3 Memory Game -->
+        <div class="stanza-container">
+            <div class="stanza-box">
+                <div class="poem-text">
+                    A polished khaki mailbox, stood post at the edge of his yard,<br>
+                    And every other morning, Old Pat would hand him a card,<br>
+                    A present from aunty Helen, a neighbour's wedding invite,<br>
+                    A reminder about the insurance, with a rate that wasn't quite right.
+                </div>
+                <div class="memory-grid" id="mem-grid"></div>
+                <p class="typewriter-sub">(Match sets of 3: Present 🎁, Invite 💌, Insurance 📄)</p>
+            </div>
+        </div>
+
+        <!-- Stanza 2: Quiz Game -->
+        <div class="stanza-container">
+            <div class="stanza-box">
+                <div class="poem-text">
+                    On Sundays, the local paper; on Wednesday, a Woman's Day,<br>
+                    On Friday, a pamphlet for groceries; but nothing on a Saturday.<br>
+                    Once a year, at Christmas time, he'd be dressed in a tinsel suit.<br>
+                    The mailbox, at the edge of his yard, stuffed full of festive loot.
+                </div>
+                <p class="typewriter-sub" id="quiz-prompt" style="margin-bottom:10px; font-weight:bold; color:var(--postal-blue);"></p>
+                <div class="quiz-options" id="quiz-options"></div>
+            </div>
+        </div>
+
+        <!-- Stanza 3: Timed Guard the Mailbox Game -->
+        <div class="stanza-container">
+            <div class="stanza-box">
+                <div class="poem-text">
+                    He didn't mind the busy times, nor the weight of his usual duty,<br>
+                    He didn't mind that he had to hold, not keep, the passing booty.<br>
+                    He liked the puppy at his leg, that barked and wet his limb.<br>
+                    And too the pigeon on his head, that trod and cooed upon him.
+                </div>
+                <div class="shoo-stage" id="shoo-stage">
+                    <div class="mailbox-center">📬</div>
+                </div>
+                <p class="typewriter-sub" id="s3-status">(Tap any visitor to start the 10s blitz!)</p>
+            </div>
+        </div>
+
+        <!-- Stanza 4: Moving Rain Grid Maze -->
+        <div class="stanza-container">
+            <div class="stanza-box">
+                <div class="poem-text">
+                    When it stormed, he didn't shudder, just held his ground in the wet,<br>
+                    For all the wind, he'd never fall, to do so'd be a regret.<br>
+                    When the calm of winter'd come, he'd snoop and have a reading,<br>
+                    Of dreams and hopes, of newly betrothed, and other lives worth leading.
+                </div>
+                <div class="maze-container">
+                    <div class="grid-board" id="grid-board"></div>
+                    <div class="dpad">
+                        <div></div>
+                        <button class="dpad-btn" onclick="movePlayer(0, -1)">▲</button>
+                        <div></div>
+                        <button class="dpad-btn" onclick="movePlayer(-1, 0)">◄</button>
+                        <button class="dpad-btn" onclick="movePlayer(0, 1)">▼</button>
+                        <button class="dpad-btn" onclick="movePlayer(1, 0)">►</button>
+                    </div>
+                </div>
+                <p class="typewriter-sub" id="s4-status">(Dodge moving rain drops to reach 📬)</p>
+            </div>
+        </div>
+
+        <!-- Stanza 5: Envelope Hangman -->
+        <div class="stanza-container">
+            <div class="stanza-box">
+                <div class="poem-text">
+                    A polished khaki mailbox, stood post at the edge of his yard,<br>
+                    Every family been and gone, ten years since he last saw a card.<br>
+                    He'd heard about the emails, on the tv across the street,<br>
+                    Just like he'd heard the telephones, and Zoom calls on repeat.
+                </div>
+                <div class="hangman-area">
+                    <svg class="envelope-svg" viewBox="0 0 100 60">
+                        <line x1="10" y1="50" x2="90" y2="50" class="envelope-line" id="env-1" />
+                        <line x1="10" y1="10" x2="10" y2="50" class="envelope-line" id="env-2" />
+                        <line x1="90" y1="10" x2="90" y2="50" class="envelope-line" id="env-3" />
+                        <polyline points="10,10 50,35 90,10" class="envelope-line" id="env-4" fill="none" />
+                        <line x1="10" y1="10" x2="90" y2="10" class="envelope-line" id="env-5" />
+                    </svg>
+                    <div class="word-slots" id="word-slots"></div>
+                    <div class="letter-grid" id="letter-grid"></div>
+                </div>
+                <p class="typewriter-sub">(Guess letters to solve what took over without completing the envelope)</p>
+            </div>
+        </div>
+
+        <!-- Stanza 6: Polished Timing Gauge -->
+        <div class="stanza-container">
+            <div class="stanza-box">
+                <div class="poem-text">
+                    On Sundays, he'd sit there waiting, for a paper that'd never come,<br>
+                    On Wednesday, he'd wish for a magazine, or a comic, or something fun.<br>
+                    Once a week, he'd watch with hope, as a van pulled into the drive,<br>
+                    But the parcel was left by the front of the door, waiting for them to arrive.
+                </div>
+                <div class="gauge-card">
+                    <small style="font-family:'Courier Prime'; text-transform:uppercase; letter-spacing:1px; color:var(--postal-blue);">Parcel Alignment Dispatch</small>
+                    <div class="meter-housing">
+                        <div class="sweet-spot"></div>
+                        <div class="meter-needle" id="gauge-needle"></div>
+                    </div>
+                    <button class="intercept-btn" id="gauge-btn" onclick="catchGaugeParcel()">REDIRECT PARCEL TO MAILBOX</button>
+                </div>
+                <p class="typewriter-sub">(Time your click inside the target zone)</p>
+            </div>
+        </div>
+
+        <!-- Stanza 7: Pat's Retirement Log -->
+        <div class="stanza-container">
+            <div class="stanza-box">
+                <div class="poem-text">
+                    He didn't mind the quiet time, he tried not to overthink.<br>
+                    He didn't mind that his job was done, much faster than a blink.<br>
+                    He liked the purpose he once had, he'd reflect come demo day.<br>
+                    A polished khaki mailbox, like a letter, was sent away.
+                </div>
+                <div class="pat-log-card">
+                    <div class="pat-badge">OFFICIAL POSTAL LOG // OLD PAT</div>
+                    <button class="save-mail-btn" id="save-mail-btn" onclick="saveMailboxAndLog()">SAVE MAILBOX</button>
+                    <div class="pat-stamp" id="pat-stamp">PRESERVED IN HISTORY</div>
+                    <p id="pat-summary" style="font-family:'Courier Prime'; margin-top:12px; display:none; font-size:0.95rem; line-height:1.5; color:var(--postal-blue);"></p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let totalSent = 0;
+        const scoreVal = document.getElementById('score-val');
+        const hud = document.getElementById('hud');
+
+        function addScore(pts = 1) {
+            totalSent += pts;
+            scoreVal.innerText = totalSent;
+            hud.classList.add('bump');
+            setTimeout(() => hud.classList.remove('bump'), 150);
+        }
+
+        /* --- STANZA 1: Memory Match Logic --- */
+        const memGrid = document.getElementById('mem-grid');
+        const memIcons = ['🎁','🎁','🎁','💌','💌','💌','📄','📄','📄'];
+        memIcons.sort(() => Math.random() - 0.5);
+        
+        let flippedCards = [];
+        memIcons.forEach((icon, index) => {
+            const card = document.createElement('div');
+            card.className = 'mem-card';
+            card.dataset.icon = icon;
+            card.innerText = '📮';
+            card.onclick = () => flipMemCard(card);
+            memGrid.appendChild(card);
+        });
+
+        function flipMemCard(card) {
+            if (card.classList.contains('flipped') || card.classList.contains('matched') || flippedCards.length >= 3) return;
+            
+            card.classList.add('flipped');
+            card.innerText = card.dataset.icon;
+            flippedCards.push(card);
+
+            if (flippedCards.length === 3) {
+                const first = flippedCards[0].dataset.icon;
+                const isMatch = flippedCards.every(c => c.dataset.icon === first);
+
+                if (isMatch) {
+                    flippedCards.forEach(c => c.classList.add('matched'));
+                    flippedCards = [];
+                    addScore(1);
+                } else {
+                    setTimeout(() => {
+                        flippedCards.forEach(c => {
+                            c.classList.remove('flipped');
+                            c.innerText = '📮';
+                        });
+                        flippedCards = [];
+                    }, 700);
+                }
+            }
+        }
+
+        /* --- STANZA 2: Quiz Logic --- */
+        const quizBank = [
+            { prompt: "What item does Pat deliver on Sunday?", correct: "Local Paper", options: ["Local Paper", "Woman's Day Magazine", "Pamphlet for Groceries", "Festive Loot"] },
+            { prompt: "What item does Pat deliver on Wednesday?", correct: "Woman's Day Magazine", options: ["Woman's Day Magazine", "Local Paper", "Pamphlet for Groceries", "Insurance Bill"] },
+            { prompt: "What item does Pat deliver on Friday?", correct: "Pamphlet for Groceries", options: ["Pamphlet for Groceries", "Local Paper", "Woman's Day Magazine", "Festive Loot"] },
+            { prompt: "What stuffs the mailbox at Christmas time?", correct: "Festive Loot", options: ["Festive Loot", "Local Paper", "Woman's Day Magazine", "Pamphlet for Groceries"] }
+        ];
+
+        const chosenQuiz = quizBank[Math.floor(Math.random() * quizBank.length)];
+        document.getElementById('quiz-prompt').innerText = chosenQuiz.prompt;
+
+        const shuffledOptions = [...chosenQuiz.options].sort(() => Math.random() - 0.5);
+        const quizOptionsContainer = document.getElementById('quiz-options');
+
+        let quizAnswered = false;
+        shuffledOptions.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'quiz-btn';
+            btn.innerText = opt;
+            btn.onclick = () => {
+                if (quizAnswered) return;
+                quizAnswered = true;
+                if (opt === chosenQuiz.correct) {
+                    btn.classList.add('correct');
+                    addScore(1);
+                } else {
+                    btn.classList.add('wrong');
+                }
+                document.querySelectorAll('.quiz-btn').forEach(b => b.disabled = true);
+            };
+            quizOptionsContainer.appendChild(btn);
+        });
+
+        /* --- STANZA 3: Timed Guard the Mailbox Blitz --- */
+        const shooStage = document.getElementById('shoo-stage');
+        let shooCount = 0;
+        let shooTimeLeft = 10;
+        let shooTimer = null;
+        let shooActive = true;
+
+        function startShooGame() {
+            if (shooTimer) return;
+            shooTimer = setInterval(() => {
+                shooTimeLeft--;
+                updateShooStatus();
+                if (shooTimeLeft <= 0) {
+                    clearInterval(shooTimer);
+                    shooActive = false;
+                    document.querySelectorAll('.shoo-visitor').forEach(v => v.remove());
+                    addScore(shooCount); // 1 point per shooed visitor
+                    document.getElementById('s3-status').innerText = `✓ Blitz over! You shooed ${shooCount} visitors! (+${shooCount})`;
+                    document.getElementById('s3-status').style.color = 'var(--success-green)';
+                }
+            }, 1000);
+        }
+
+        function updateShooStatus() {
+            if (shooActive) {
+                document.getElementById('s3-status').innerText = `⏱️ ${shooTimeLeft}s left | Shooed: ${shooCount}`;
+            }
+        }
+
+        function spawnVisitor() {
+            if (!shooActive) return;
+            if (document.querySelectorAll('.shoo-visitor').length >= 3) return;
+
+            const visitor = document.createElement('div');
+            visitor.className = 'shoo-visitor';
+            visitor.innerText = Math.random() > 0.5 ? '🐕' : '🕊️';
+            
+            const angles = [15, 45, 80, 120, 160, 200, 240, 290, 330];
+            const angle = angles[Math.floor(Math.random() * angles.length)];
+            const rad = angle * (Math.PI / 180);
+            const x = 140 + Math.cos(rad) * 95 - 15;
+            const y = 75 + Math.sin(rad) * 55 - 15;
+            
+            visitor.style.left = `${x}px`;
+            visitor.style.top = `${y}px`;
+
+            visitor.onclick = () => {
+                if (!shooActive) return;
+                startShooGame(); // Begins 10s countdown on first click
+                visitor.remove();
+                shooCount++;
+                updateShooStatus();
+                spawnVisitor();
+                setTimeout(spawnVisitor, 180);
+            };
+
+            shooStage.appendChild(visitor);
+        }
+
+        spawnVisitor();
+        spawnVisitor();
+
+        /* --- STANZA 4: Moving Rain Grid Maze --- */
+        const gridBoard = document.getElementById('grid-board');
+        let playerPos = { x: 0, y: 0 };
+        const goalPos = { x: 4, y: 4 };
+        let rainDrops = [
+            { x: 1, y: 0, dir: 1 },
+            { x: 2, y: 4, dir: -1 },
+            { x: 3, y: 1, dir: 1 },
+            { x: 0, y: 2, dir: 1 }
+        ];
+        let mazeActive = true;
+
+        for (let r = 0; r < 5; r++) {
+            for (let c = 0; c < 5; c++) {
+                const cell = document.createElement('div');
+                cell.className = 'grid-cell';
+                cell.id = `cell-${c}-${r}`;
+                if (c === goalPos.x && r === goalPos.y) cell.classList.add('goal');
+                gridBoard.appendChild(cell);
+            }
+        }
+
+        function renderMaze() {
+            for (let r = 0; r < 5; r++) {
+                for (let c = 0; c < 5; c++) {
+                    const cell = document.getElementById(`cell-${c}-${r}`);
+                    cell.innerText = (c === goalPos.x && r === goalPos.y) ? '📬' : '';
+                }
+            }
+            rainDrops.forEach(drop => {
+                const cell = document.getElementById(`cell-${drop.x}-${drop.y}`);
+                if (cell && (drop.x !== goalPos.x || drop.y !== goalPos.y)) cell.innerText = '💧';
+            });
+            const pCell = document.getElementById(`cell-${playerPos.x}-${playerPos.y}`);
+            if (pCell) pCell.innerText = '✉️';
+        }
+
+        function movePlayer(dx, dy) {
+            if (!mazeActive) return;
+            const newX = Math.max(0, Math.min(4, playerPos.x + dx));
+            const newY = Math.max(0, Math.min(4, playerPos.y + dy));
+            playerPos = { x: newX, y: newY };
+            checkMazeState();
+            renderMaze();
+        }
+
+        function updateRain() {
+            if (!mazeActive) return;
+            rainDrops.forEach(drop => {
+                drop.y += drop.dir;
+                if (drop.y > 4) { drop.y = 4; drop.dir = -1; }
+                if (drop.y < 0) { drop.y = 0; drop.dir = 1; }
+            });
+            checkMazeState();
+            renderMaze();
+        }
+
+        function checkMazeState() {
+            const hitRain = rainDrops.some(drop => drop.x === playerPos.x && drop.y === playerPos.y);
+            if (hitRain) playerPos = { x: 0, y: 0 };
+            
+            if (playerPos.x === goalPos.x && playerPos.y === goalPos.y) {
+                mazeActive = false;
+                document.getElementById('s4-status').innerText = '✓ Safe through the storm! (+2)';
+                document.getElementById('s4-status').style.color = 'var(--success-green)';
+                addScore(2);
+            }
+        }
+
+        setInterval(updateRain, 650);
+        renderMaze();
+
+        window.addEventListener('keydown', (e) => {
+            if (['ArrowUp', 'KeyW'].includes(e.code)) movePlayer(0, -1);
+            if (['ArrowDown', 'KeyS'].includes(e.code)) movePlayer(0, 1);
+            if (['ArrowLeft', 'KeyA'].includes(e.code)) movePlayer(-1, 0);
+            if (['ArrowRight', 'KeyD'].includes(e.code)) movePlayer(1, 0);
+        });
+
+        /* --- STANZA 5: Hangman Logic --- */
+        const wordPool = ["EMAIL", "COMPUTER", "TELEVISION", "TELEPHONE", "ZOOM"];
+        const secretWord = wordPool[Math.floor(Math.random() * wordPool.length)];
+        let guessedLetters = [];
+        let wrongGuesses = 0;
+        const maxWrong = 5;
+
+        const letterGrid = document.getElementById('letter-grid');
+        const wordSlots = document.getElementById('word-slots');
+
+        updateSlots();
+
+        for (let i = 65; i <= 90; i++) {
+            const char = String.fromCharCode(i);
+            const btn = document.createElement('button');
+            btn.className = 'key-btn';
+            btn.innerText = char;
+            btn.onclick = () => guessHangman(char, btn);
+            letterGrid.appendChild(btn);
+        }
+
+        function guessHangman(char, btn) {
+            btn.disabled = true;
+            if (secretWord.includes(char)) {
+                guessedLetters.push(char);
+                updateSlots();
+                if (secretWord.split('').every(c => guessedLetters.includes(c))) {
+                    addScore(2);
+                    disableHangman('SOLVED! (+2)');
+                }
+            } else {
+                wrongGuesses++;
+                if (wrongGuesses <= maxWrong) {
+                    document.getElementById(`env-${wrongGuesses}`).classList.add('drawn');
+                }
+                if (wrongGuesses === maxWrong) {
+                    disableHangman(`SEALED! WORD WAS: ${secretWord}`);
+                }
+            }
+        }
+
+        function updateSlots() {
+            wordSlots.innerText = secretWord.split('')
+                .map(c => guessedLetters.includes(c) ? c : '_')
+                .join(' ');
+        }
+
+        function disableHangman(msg) {
+            document.querySelectorAll('.key-btn').forEach(b => b.disabled = true);
+            const sub = document.createElement('p');
+            sub.className = 'typewriter-sub';
+            sub.style.fontWeight = 'bold';
+            sub.style.color = 'var(--postal-blue)';
+            sub.innerText = msg;
+            document.querySelector('.hangman-area').appendChild(sub);
+        }
+
+        /* --- STANZA 6: Gauge Meter Logic --- */
+        const needle = document.getElementById('gauge-needle');
+        let needlePos = 0;
+        let needleDir = 2.2;
+        let gaugeActive = true;
+
+        function animateNeedle() {
+            if (!gaugeActive) return;
+            needlePos += needleDir;
+            if (needlePos >= 96 || needlePos <= 0) needleDir *= -1;
+            needle.style.left = needlePos + '%';
+            requestAnimationFrame(animateNeedle);
+        }
+        requestAnimationFrame(animateNeedle);
+
+        function catchGaugeParcel() {
+            if (!gaugeActive) return;
+            gaugeActive = false;
+            const btn = document.getElementById('gauge-btn');
+            
+            if (needlePos >= 40 && needlePos <= 60) {
+                addScore(3);
+                btn.innerText = '🎯 DIRECTED TO MAILBOX (+3)';
+                btn.style.background = 'var(--success-green)';
+            } else {
+                addScore(1);
+                btn.innerText = 'LEFT ON PORCH (+1)';
+                btn.style.background = '#888';
+            }
+        }
+
+        /* --- STANZA 7: Pat's Retirement Log Logic --- */
+        function saveMailboxAndLog() {
+            document.getElementById('save-mail-btn').style.display = 'none';
+            document.getElementById('pat-stamp').style.display = 'block';
+            
+            const summary = document.getElementById('pat-summary');
+            summary.style.display = 'block';
+            summary.innerHTML = `<strong>Postmaster Pat's Record:</strong><br>You helped save <strong>${totalSent}</strong> pieces of physical mail, holding post alongside the khaki mailbox before demo day came.`;
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('visible');
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.stanza-container').forEach(el => observer.observe(el));
+    </script>
+</body>
+</html>
